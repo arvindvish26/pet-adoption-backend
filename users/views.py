@@ -26,13 +26,27 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action in ['create']:
+        if self.action in ['create', 'login']:
             permission_classes = [permissions.AllowAny]
         elif self.action in ['list', 'destroy']:
             permission_classes = [permissions.IsAuthenticated, IsAdminUser]
         else:
             permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
         return [permission() for permission in permission_classes]
+    
+    def create(self, request, *args, **kwargs):
+        """Override create to handle registration"""
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                'message': 'User registered successfully',
+                'user': UserListSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            'errors': serializer.errors,
+            'message': 'Registration failed'
+        }, status=status.HTTP_400_BAD_REQUEST)
     
     def get_queryset(self):
         if self.request.user.is_staff:
@@ -49,9 +63,13 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'user': UserListSerializer(user).data
+                'user': UserListSerializer(user).data,
+                'message': 'Login successful'
             })
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'errors': serializer.errors,
+            'message': 'Login failed'
+        }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):

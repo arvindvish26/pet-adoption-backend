@@ -42,7 +42,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class AccessoryViewSet(viewsets.ModelViewSet):
     queryset = Accessory.objects.all()
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['category', 'stock']
+    filterset_fields = ['category', 'stock', 'currency']
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'price', 'stock']
     ordering = ['-id']

@@ -20,11 +20,24 @@ class CategoryListSerializer(serializers.ModelSerializer):
 
 class AccessorySerializer(serializers.ModelSerializer):
     category_detail = CategoryListSerializer(source='category', read_only=True)
+    formatted_price = serializers.ReadOnlyField()
     
     class Meta:
         model = Accessory
-        fields = ['id', 'name', 'price', 'stock', 'description', 'category', 'category_detail', 'image']
+        fields = ['id', 'name', 'price', 'currency', 'formatted_price', 'stock', 'description', 'category', 'category_detail', 'image']
         read_only_fields = ['id']
+    
+    def to_representation(self, instance):
+        """Override to return clean image URL"""
+        data = super().to_representation(instance)
+        if instance.image and instance.image.name:
+            # If it's a full URL (starts with http), return as is
+            if instance.image.name.startswith('http'):
+                data['image'] = instance.image.name
+            # Otherwise, return the Django media URL
+            else:
+                data['image'] = instance.image.url
+        return data
     
     def validate_price(self, value):
         if value <= 0:
@@ -40,13 +53,26 @@ class AccessoryListSerializer(serializers.ModelSerializer):
     """Simplified serializer for listing accessories"""
     category_name = serializers.CharField(source='category.name', read_only=True)
     is_in_stock = serializers.SerializerMethodField()
+    formatted_price = serializers.ReadOnlyField()
     
     class Meta:
         model = Accessory
-        fields = ['id', 'name', 'price', 'stock', 'category_name', 'image', 'is_in_stock']
+        fields = ['id', 'name', 'price', 'currency', 'formatted_price', 'stock', 'category_name', 'image', 'is_in_stock']
     
     def get_is_in_stock(self, obj):
         return obj.stock > 0
+    
+    def to_representation(self, instance):
+        """Override to return clean image URL"""
+        data = super().to_representation(instance)
+        if instance.image and instance.image.name:
+            # If it's a full URL (starts with http), return as is
+            if instance.image.name.startswith('http'):
+                data['image'] = instance.image.name
+            # Otherwise, return the Django media URL
+            else:
+                data['image'] = instance.image.url
+        return data
 
 class AccessoryStockUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating accessory stock"""

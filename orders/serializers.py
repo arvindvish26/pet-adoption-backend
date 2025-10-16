@@ -56,7 +56,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating orders"""
     class Meta:
         model = Order
-        fields = ['cart', 'shipping_address', 'billing_address']
+        fields = ['id', 'cart', 'shipping_address', 'billing_address', 'total_price', 'status', 'created_at']
+        read_only_fields = ['id', 'total_price', 'status', 'created_at']
     
     def validate_cart(self, value):
         # Ensure cart has items

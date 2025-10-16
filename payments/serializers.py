@@ -39,7 +39,8 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating payments"""
     class Meta:
         model = Payment
-        fields = ['order', 'payment_method']
+        fields = ['id', 'order', 'payment_method', 'status', 'amount', 'paid_at']
+        read_only_fields = ['id', 'status', 'amount', 'paid_at']
     
     def validate_order(self, value):
         # Ensure order exists and is not already paid

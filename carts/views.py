@@ -6,14 +6,14 @@ from django.db.models import Sum
 from .models import Cart, CartAccessory
 from .serializers import (CartSerializer, CartListSerializer, AddToCartSerializer, 
                          UpdateCartItemSerializer, CartAccessorySerializer)
-from petstore.permissions import IsOwnerOrAdmin
+from petstore.permissions import IsCartOwnerOrAdmin
 
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     ordering_fields = ['created_at']
     ordering = ['-created_at']
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsCartOwnerOrAdmin]
     
     def get_serializer_class(self):
         if self.action == 'list':
@@ -158,7 +158,7 @@ class CartViewSet(viewsets.ModelViewSet):
 class CartAccessoryViewSet(viewsets.ModelViewSet):
     queryset = CartAccessory.objects.all()
     serializer_class = CartAccessorySerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsCartOwnerOrAdmin]
     
     def get_queryset(self):
         """

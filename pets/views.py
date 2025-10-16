@@ -10,7 +10,7 @@ from petstore.permissions import IsAdminUser
 class PetViewSet(viewsets.ModelViewSet):
     queryset = Pet.objects.all()
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'category', 'vaccinated', 'city']
+    filterset_fields = ['status', 'category', 'vaccinated', 'city', 'breed']
     search_fields = ['name', 'breed', 'city']
     ordering_fields = ['name', 'age', 'created_at']
     ordering = ['-id']

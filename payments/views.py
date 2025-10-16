@@ -7,7 +7,7 @@ from django.utils import timezone
 from .models import Payment
 from .serializers import (PaymentSerializer, PaymentListSerializer, PaymentCreateSerializer, 
                          PaymentStatusUpdateSerializer)
-from petstore.permissions import IsAdminUser, IsOwnerOrAdmin
+from petstore.permissions import IsAdminUser, IsPaymentOwnerOrAdmin
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
@@ -30,8 +30,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
         Instantiates and returns the list of permissions that this view requires.
         """
         if self.action in ['list', 'retrieve']:
-            permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
-        elif self.action in ['create']:
+            permission_classes = [permissions.IsAuthenticated, IsPaymentOwnerOrAdmin]
+        elif self.action in ['create', 'process_payment']:
             permission_classes = [permissions.IsAuthenticated]
         else:
             permission_classes = [permissions.IsAuthenticated, IsAdminUser]
@@ -88,10 +88,17 @@ class PaymentViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['post'])
     def process_payment(self, request, pk=None):
         """Process a payment (simulate payment processing)"""
         payment = self.get_object()
+        
+        # Check if user owns the payment's order
+        if payment.order.user != request.user and not request.user.is_staff:
+            return Response(
+                {'error': 'You can only process your own payments'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
         
         if payment.status != 'Pending':
             return Response(
