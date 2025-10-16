@@ -17,13 +17,13 @@ Backend for the Pet Adoption System built with Django, Django REST Framework, JW
 ```bash
 cd "Pet Adoption System/pet-adoption-backend"
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate #this for mac and for windows use .venv\Scripts\activate
 pip install --upgrade pip
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
-API: `http://localhost:8000/`
+API: `http://127.0.0.1:8000/`
 
 ## First-Time Setup (if no requirements.txt)
 ```bash
@@ -47,7 +47,7 @@ python manage.py migrate
 ```bash
 python manage.py createsuperuser
 ```
-Admin: `http://localhost:8000/admin/`
+Admin: `http://127.0.0.1:8000/admin/`
 
 ## Auth
 - JWT via SimpleJWT
@@ -55,7 +55,7 @@ Admin: `http://localhost:8000/admin/`
 
 ## API Docs
 See `API_DOCUMENTATION.md` for endpoints and examples.
-Base: `http://localhost:8000/api/`
+Base: `http://127.0.0.1:8000/api/`
 
 ## Useful Commands
 ```bash
