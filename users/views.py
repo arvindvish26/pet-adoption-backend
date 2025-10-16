@@ -16,6 +16,7 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ['username', 'email', 'first_name', 'last_name']
     ordering_fields = ['username', 'email', 'date_joined']
     ordering = ['-date_joined']
+    permission_classes = [permissions.AllowAny]  # Default to AllowAny, override in get_permissions
     
     def get_serializer_class(self):
         if self.action == 'list':
@@ -26,7 +27,7 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action in ['create', 'login']:
+        if self.action in ['create', 'register', 'login']:
             permission_classes = [permissions.AllowAny]
         elif self.action in ['list', 'destroy']:
             permission_classes = [permissions.IsAuthenticated, IsAdminUser]
@@ -52,6 +53,21 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.request.user.is_staff:
             return User.objects.all()
         return User.objects.filter(id=self.request.user.id)
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def register(self, request):
+        """Custom registration action"""
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                'message': 'User registered successfully',
+                'user': UserListSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            'errors': serializer.errors,
+            'message': 'Registration failed'
+        }, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def login(self, request):
